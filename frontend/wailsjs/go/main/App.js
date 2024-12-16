@@ -5,3 +5,27 @@
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function PickDBFile() {
+  return window['go']['main']['App']['PickDBFile']();
+}
+
+export function PickLogFile() {
+  return window['go']['main']['App']['PickLogFile']();
+}
+
+export function QueryIPCounts(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['QueryIPCounts'](arg1, arg2, arg3, arg4);
+}
+
+export function QueryStatusCounts(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['QueryStatusCounts'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function QueryView(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['QueryView'](arg1, arg2, arg3, arg4);
+}
+
+export function RunImport(arg1, arg2) {
+  return window['go']['main']['App']['RunImport'](arg1, arg2);
+}

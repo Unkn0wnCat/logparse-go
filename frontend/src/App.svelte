@@ -1,44 +1,114 @@
 <script lang="ts">
-  import logo from './assets/images/logo-universal.png'
-  import {Greet} from '../wailsjs/go/main/App.js'
+  import {PickDBFile} from '../wailsjs/go/main/App.js'
+  import Importer from "./components/Importer.svelte";
+  import Viewer from "./components/Viewer.svelte";
+  import IPCounter from "./components/IPCounter.svelte";
+  import StatusCounter from "./components/StatusCounter.svelte";
 
-  let resultText: string = "Please enter your name below 👇"
-  let name: string
+  let dbFile: string = ""
 
-  function greet(): void {
-    Greet(name).then(result => resultText = result)
+  let activeTab: "importer"|"view"|"ip_counter"|"error_counter" = "importer"
+
+  function pickDb(): void {
+    PickDBFile().then(result => dbFile = result)
   }
 </script>
 
 <main>
   <h1>Log Parser</h1>
-  <div class="result" id="result">{resultText}</div>
-  <div class="input-box" id="input">
-    <input autocomplete="off" bind:value={name} class="input" id="name" type="text"/>
-    <button class="btn" on:click={greet}>Greet</button>
 
-    <input id="file" type="file" />
+  <div class="dbselect">
+    <span class="title">Datenbank</span>
+    <span class="path">{dbFile || "Keine Datenbank geöffnet"}</span>
+    <button on:click={() => pickDb()}>Auswählen</button>
   </div>
+
+  <div class="tabs">
+    <div class="tabbar">
+      <button on:click={() => activeTab = "importer"} class:active={activeTab === "importer"}>Import</button>
+      <button on:click={() => activeTab = "view"} class:active={activeTab === "view"}>Anzeigen</button>
+      <button on:click={() => activeTab = "ip_counter"} class:active={activeTab === "ip_counter"}>IP-Analyse</button>
+      <button on:click={() => activeTab = "error_counter"} class:active={activeTab === "error_counter"}>Status-Analyse</button>
+    </div>
+    {#if activeTab === "importer"}
+      <div class="tab">
+        <Importer {dbFile} />
+      </div>
+    {/if}
+    {#if activeTab === "view"}
+      <div class="tab">
+        <Viewer {dbFile} />
+      </div>
+    {/if}
+    {#if activeTab === "ip_counter"}
+      <div class="tab">
+        <IPCounter {dbFile} />
+      </div>
+    {/if}
+    {#if activeTab === "error_counter"}
+      <div class="tab">
+        <StatusCounter {dbFile} />
+      </div>
+    {/if}
+  </div>
+
 </main>
 
 <style>
-
-  #logo {
-    display: block;
-    width: 50%;
-    height: 50%;
-    margin: auto;
-    padding: 10% 0 0;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-origin: content-box;
+  .dbselect {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid white;
+    width: 300px;
+    margin: 10px auto;
+    border-radius: 5px;
   }
 
-  .result {
-    height: 20px;
-    line-height: 20px;
-    margin: 1.5rem auto;
+  .dbselect .title {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .dbselect .path {
+    font-family: monospace;
+    padding: 10px;
+  }
+
+  .dbselect button {
+    border: none;
+  }
+
+  .tabs {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid white;
+    border-radius: 5px;
+    margin: 20px;
+  }
+
+  .tabbar {
+    border-bottom: 2px solid white;
+  }
+
+  .tabbar button {
+    border: none;
+    border-right: 2px solid white;
+    border-bottom: 4px solid transparent;
+    font: inherit;
+    color: inherit;
+    background-color: transparent;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    appearance: none;
+  }
+
+  .tabbar button.active {
+    border-bottom-color: orange;
+  }
+
+  .tabbar button:last-child {
+    border-right: none;
   }
 
   .input-box .btn {
