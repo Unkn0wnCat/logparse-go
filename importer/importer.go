@@ -25,7 +25,12 @@ func Import(logFile string, databaseFile string) (*resultcollector.ResultCollect
 	batchSize := 200
 
 	for start := 0; start < len(lines); start += batchSize {
-		err = db.BatchPersistLines(lines[start:(start+batchSize)], collector)
+		end := start + batchSize
+		if end >= len(lines) {
+			end = len(lines) - 1
+		}
+
+		err = db.BatchPersistLines(lines[start:end], collector)
 		if err != nil {
 			return nil, err
 		}
