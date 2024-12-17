@@ -76,6 +76,7 @@
 
   .dbselect button {
     border: none;
+    margin-bottom: 0;
   }
 
   .tabs {

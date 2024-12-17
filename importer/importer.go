@@ -20,7 +20,9 @@ func Import(logFile string, databaseFile string) (*resultcollector.ResultCollect
 		return nil, err
 	}
 
-	batchSize := 100
+	log.Printf("Starting persistence for %d lines", len(lines))
+
+	batchSize := 200
 
 	for start := 0; start < len(lines); start += batchSize {
 		err = db.BatchPersistLines(lines[start:(start+batchSize)], collector)
@@ -34,7 +36,7 @@ func Import(logFile string, databaseFile string) (*resultcollector.ResultCollect
 		return nil, err
 	}
 
-	log.Println("--- COLLECTOR DUMP ---\n" + collector.DumpString() + "\n--- COLLECTOR END ---")
+	//log.Println("--- COLLECTOR DUMP ---\n" + collector.DumpString() + "\n--- COLLECTOR END ---")
 
 	return collector, nil
 }

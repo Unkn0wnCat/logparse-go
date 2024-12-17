@@ -131,9 +131,14 @@ func (inst *Database) BatchPersistLines(lines []parser.LogLine, collector *resul
 	log.Printf("Deduplicating...")
 
 	var dedupedLines []parser.LogLine
+	var currentHashes []string
 
 	for _, line := range lines {
 		hash := line.Hash()
+
+		if line.IP == "" {
+			continue
+		}
 
 		isDupe := false
 		for _, dupeHash := range dupeHashes {
@@ -142,14 +147,23 @@ func (inst *Database) BatchPersistLines(lines []parser.LogLine, collector *resul
 				break
 			}
 		}
+		if !isDupe {
+			for _, dupeHash := range currentHashes {
+				if hash == dupeHash {
+					isDupe = true
+					break
+				}
+			}
+		}
 
 		if !isDupe {
 			dedupedLines = append(dedupedLines, line)
+			currentHashes = append(currentHashes, hash)
 			continue
 		}
 
 		// Is Duplicate.
-		log.Printf("Found duplicate line: %v", line)
+		//log.Printf("Found duplicate line: %v", line)
 		collector.Add(resultcollector.Result{
 			Scope:    resultcollector.ScopeLine,
 			Filename: line.Filename,
@@ -186,10 +200,14 @@ func (inst *Database) BatchPersistLines(lines []parser.LogLine, collector *resul
 		})
 	}
 
+	log.Printf("Committing...")
+
 	err = tx.Commit()
 	if err != nil {
 		return err
 	}
+
+	log.Printf("BatchPersistLines completed.")
 
 	return nil
 }
@@ -221,7 +239,7 @@ func (inst *Database) Query(ipFilter string, timestampFilterFrom string, timesta
 		sql += ` 1 = 1`
 	}
 
-	sql += ` ORDER BY timestamp DESC`
+	sql += ` ORDER BY timestamp ASC`
 
 	log.Printf("%s", sql)
 
@@ -245,7 +263,7 @@ func (inst *Database) Query(ipFilter string, timestampFilterFrom string, timesta
 
 	var lines []parser.LogLine
 	for rows.Next() {
-		log.Printf("Processing row %d", len(lines)+1)
+		//log.Printf("Processing row %d", len(lines)+1)
 		var hash string
 		var ip string
 		var timestamp string
@@ -272,7 +290,7 @@ func (inst *Database) Query(ipFilter string, timestampFilterFrom string, timesta
 			LineNumber: 0,
 		})
 
-		log.Printf("Line %d read", len(lines))
+		//log.Printf("Line %d read", len(lines))
 	}
 
 	return lines, nil
@@ -334,7 +352,7 @@ func (inst *Database) QueryIPCounts(ipFilter string, timestampFilterFrom string,
 
 	var lines []IPCount
 	for rows.Next() {
-		log.Printf("Processing row %d", len(lines)+1)
+		//log.Printf("Processing row %d", len(lines)+1)
 		var ip string
 		var count int
 
@@ -348,7 +366,7 @@ func (inst *Database) QueryIPCounts(ipFilter string, timestampFilterFrom string,
 			Count: count,
 		})
 
-		log.Printf("Line %d read", len(lines))
+		//log.Printf("Line %d read", len(lines))
 	}
 
 	return lines, nil
@@ -434,7 +452,7 @@ func (inst *Database) QueryStatusCounts(ipFilter string, timestampFilterFrom str
 
 	var lines []StatusCount
 	for rows.Next() {
-		log.Printf("Processing row %d", len(lines)+1)
+		//log.Printf("Processing row %d", len(lines)+1)
 		var status int
 		var count int
 
@@ -448,7 +466,7 @@ func (inst *Database) QueryStatusCounts(ipFilter string, timestampFilterFrom str
 			Count:  count,
 		})
 
-		log.Printf("Line %d read", len(lines))
+		//log.Printf("Line %d read", len(lines))
 	}
 
 	return lines, nil

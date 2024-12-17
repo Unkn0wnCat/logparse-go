@@ -72,8 +72,9 @@
 <style>
     .table {
         overflow:auto;
-        width: 100%;
+        width: calc(100% - 20px);
         height: 500px;
+        margin: 10px;
     }
 
     table {
